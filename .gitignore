@@ -1,4 +1,6 @@
 opt_1/
 opt_2/
-mysql_datadir/
+opt_3/
+var/
 etc/
+repo/

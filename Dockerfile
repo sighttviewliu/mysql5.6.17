@@ -2,7 +2,6 @@
 FROM centos:7.4
 
 #RUN groupadd -r mysql && useradd -r -g mysql mysql
-#USER mysql
 
 WORKDIR /
 

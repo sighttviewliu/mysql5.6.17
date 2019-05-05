@@ -3,7 +3,7 @@ FROM centos:7.4
 
 RUN groupadd -r mysql && useradd -r -g mysql mysql
 
-RUN yum -y install gnupg dirmngr ca-certificates wget
+RUN yum -y install gnupg dirmngr ca-certificates wget pwgen perl
 
 COPY gosu /usr/local/bin/
 
@@ -12,8 +12,6 @@ RUN set -x \
     && gosu nobody true
 
 RUN mkdir /docker-entrypoint-initdb.d
-
-RUN yum -y install pwgen perl
 
 RUN set -ex
 
@@ -31,9 +29,9 @@ VOLUME /var/lib/mysql
 
 COPY docker-entrypoint.sh /usr/local/bin/
 
-RUN ln -s /usr/local/bin/docker-entrypoint.sh /entrypoint.sh
+RUN ln -s usr/local/bin/docker-entrypoint.sh /entrypoint.sh
 
-ENTRYPOINT [ "entrypoint.sh" ] 
+ENTRYPOINT [ "docker-entrypoint.sh" ] 
 
 EXPOSE 3306
 

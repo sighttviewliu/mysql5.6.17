@@ -29,10 +29,11 @@ VOLUME /var/lib/mysql
 
 COPY docker-entrypoint.sh /usr/local/bin/
 
-RUN ln -s usr/local/bin/docker-entrypoint.sh /entrypoint.sh
+RUN ln -s usr/local/bin/docker-entrypoint.sh /entrypoint.sh \
+    && chmod 777 /usr/local/bin/docker-entrypoint.sh /entrypoint.sh
 
-ENTRYPOINT [ "docker-entrypoint.sh" ] 
+ENTRYPOINT [ "/entrypoint.sh" ] 
 
 EXPOSE 3306
 
-CMD ["mysqld"]
+CMD [ "mysqld" ]

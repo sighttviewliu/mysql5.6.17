@@ -5,6 +5,7 @@ shopt -s nullglob
 # if command starts with an option, prepend mysqld
 if [ "${1:0:1}" = '-' ]; then
 	set -- mysqld "$@"
+	echo "debug: ${!:0:1} ... if command starts with an option, prepend mysqld"
 fi
 
 # skip setup if they want an option that stops mysqld
@@ -13,6 +14,7 @@ for arg; do
 	case "$arg" in
 		-'?'|--help|--print-defaults|-V|--version)
 			wantHelp=1
+			echo "debug: wantHelp=1 was set"
 			break
 			;;
 	esac
@@ -24,17 +26,23 @@ done
 #  "$XYZ_DB_PASSWORD" from a file, especially for Docker's secrets feature)
 file_env() {
 	local var="$1"
+	echo "debug: ${var} file_env"
 	local fileVar="${var}_FILE"
+	echo "debug: ${fileVar} file_env"
 	local def="${2:-}"
+	echo "debug: ${def} file_env"
 	if [ "${!var:-}" ] && [ "${!fileVar:-}" ]; then
 		echo >&2 "error: both $var and $fileVar are set (but are exclusive)"
 		exit 1
 	fi
 	local val="$def"
+	echo "debug: ${val} file_env"
 	if [ "${!var:-}" ]; then
 		val="${!var}"
+		echo "debug: ${val} file_env if"
 	elif [ "${!fileVar:-}" ]; then
 		val="$(< "${!fileVar}")"
+		echo "debug: ${val} file_env elif"
 	fi
 	export "$var"="$val"
 	unset "$fileVar"
@@ -47,7 +55,9 @@ file_env() {
 # potentially recursively, or override the logic used in subsequent calls)
 process_init_file() {
 	local f="$1"; shift
+	echo "debug: ${f} process_init_file"
 	local mysql=( "$@" )
+	echo "debug: ${mysql} process_init_file"
 
 	case "$f" in
 		*.sh)     echo "$0: running $f"; . "$f" ;;
@@ -59,7 +69,8 @@ process_init_file() {
 }
 
 _check_config() {
-	toRun=( "$@" --verbose --help --log-bin-index="$(mktemp -u)" )
+	toRun=( "$@" --verbose --help --log-bin-index="$(mktemp -u)")
+	echo "debug: ${toRun[@]} _check_config"
 	if ! errors="$("${toRun[@]}" 2>&1 >/dev/null)"; then
 		cat >&2 <<-EOM
 			ERROR: mysqld failed while attempting to check config
@@ -75,13 +86,17 @@ _check_config() {
 # latter only show values present in config files, and not server defaults
 _get_config() {
 	local conf="$1"; shift
+	echo "debug: ${conf} _check_config"
 	"$@" --verbose --help --log-bin-index="$(mktemp -u)" 2>/dev/null | awk '$1 == "'"$conf"'" { print $2; exit }'
 }
 
 # allow the container to be started with `--user`
 if [ "$1" = 'mysqld' -a -z "$wantHelp" -a "$(id -u)" = '0' ]; then
+	echo "debug: 1 allow the container to be started with .."
 	_check_config "$@"
+	echo "debug: 2 allow the container to be started with .."
 	DATADIR="$(_get_config 'datadir' "$@")"
+	echo "debug: ${DATADIR} allow the container to be started with .."
 	mkdir -p "$DATADIR"
 	chown -R mysql:mysql "$DATADIR"
 	exec gosu mysql "$BASH_SOURCE" "$@"
@@ -89,9 +104,12 @@ fi
 
 if [ "$1" = 'mysqld' -a -z "$wantHelp" ]; then
 	# still need to check config, container may have started with --user
+	echo "debug: 1 still need to check config, container may have started with"
 	_check_config "$@"
+	echo "debug: 2 still need to check config, container may have started with"
 	# Get config
 	DATADIR="$(_get_config 'datadir' "$@")"
+	echo "debug: ${DATADIR} still need to check config, container may have started with"
 
 	if [ ! -d "$DATADIR/mysql" ]; then
 		file_env 'MYSQL_ROOT_PASSWORD'

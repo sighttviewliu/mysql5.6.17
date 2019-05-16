@@ -17,10 +17,15 @@ RUN set -ex
 
 COPY mysql-community.repo /etc/yum.repos.d/
 
-RUN yum -y install mysql-community-server-5.6.17-4.el7.x86_64 \
+COPY *.rpm /
+RUN yum -y install mysql-community-server-5.6.17-4.el7.x86_64.rpm \
+    mysql-community-client-5.6.17-4.el7.x86_64.rpm \
+    mysql-community-common-5.6.17-4.el7.x86_64.rpm \ 
+    mysql-community-libs-5.6.17-4.el7.x86_64.rpm \
     && rm -rf /var/lib/mysql && mkdir -p /var/lib/mysql /var/run/mysqld \
     && chown -R mysql:mysql /var/lib/mysql /var/run/mysqld \ 
-    && chmod 777 /var/run/mysqld
+    && chmod 777 /var/run/mysqld \
+    && rm *.rpm
 
 COPY my.cnf /etc/
 COPY docker.cnf /etc/mysql/conf.d/

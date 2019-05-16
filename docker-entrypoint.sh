@@ -86,7 +86,6 @@ _check_config() {
 # latter only show values present in config files, and not server defaults
 _get_config() {
 	local conf="$1"; shift
-	echo "debug: ${conf} _check_config"
 	"$@" --verbose --help --log-bin-index="$(mktemp -u)" 2>/dev/null | awk '$1 == "'"$conf"'" { print $2; exit }'
 }
 
@@ -106,7 +105,7 @@ if [ "$1" = 'mysqld' -a -z "$wantHelp" ]; then
 	# still need to check config, container may have started with --user
 	echo "debug: 1 still need to check config, container may have started with"
 	_check_config "$@"
-	echo "debug: 2 still need to check config, container may have started with"
+	echo "debug: 2 still need to check config, container may have started with .............."
 	# Get config
 	DATADIR="$(_get_config 'datadir' "$@")"
 	echo "debug: ${DATADIR} still need to check config, container may have started with"
